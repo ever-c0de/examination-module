@@ -17,14 +17,23 @@ class FormEver extends FormBase {
       '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun', 'Q2',
         'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
       ],
+
     ];
-    $form['table']['years'] = [
+    $form['table']['first_row']['year'] = [
       'default' => [
-        '#type' => 'number',
-        '#value' => '2020',
-        '#prefix' => '<>',
-        '#sufix' => '',
+        'year' => [
+          '#plain_text' => 2020,
+        ],
       ],
+    ];
+    foreach ($form['table']['#header'] as $key) {
+      $form['table']['first_row'][$key] = [
+        '#type' => 'decimal',
+      ];
+    }
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;
