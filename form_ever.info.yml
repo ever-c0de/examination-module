@@ -1,0 +1,5 @@
+name: 'form_ever'
+type: module
+description: 'Form with validation'
+core: 8.x
+package: 'Custom'
