@@ -26,10 +26,10 @@ function form_ever_help($route_name, RouteMatchInterface $route_match) {
 /**
  * Implements hook_theme().
  */
-function form_ever_theme() {
+/*function form_ever_theme() {
   return [
     'form_ever' => [
       'render element' => 'children',
     ],
   ];
-}
+}*/

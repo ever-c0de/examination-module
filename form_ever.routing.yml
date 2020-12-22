@@ -1,0 +1,7 @@
+form_ever.custom-form:
+  path: '/module-page'
+  defaults:
+    _controller:  '\Drupal\form_ever\Controller\Page::renderForm'
+    _title: 'Ever Form'
+  requirements:
+    _permission: 'access content'
