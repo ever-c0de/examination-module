@@ -19,16 +19,13 @@ class FormEver extends FormBase {
       ],
 
     ];
-    $form['table']['first_row']['year'] = [
-      'default' => [
-        'year' => [
-          '#plain_text' => 2020,
-        ],
-      ],
-    ];
+
     foreach ($form['table']['#header'] as $key) {
       $form['table']['first_row'][$key] = [
-        '#type' => 'decimal',
+        '#type' => 'textfield',
+      ];
+      $form['table']['first_row']['Year'] = [
+        '#plain_text' => 2020,
       ];
     }
     $form['actions']['submit'] = [
