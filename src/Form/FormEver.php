@@ -8,6 +8,15 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 
+/**
+ * Implements the ajax demo form controller.
+ *
+ * This example demonstrates using ajax callbacks to add people's names to a
+ * list of picnic attendees.
+ *
+ * @see \Drupal\Core\Form\FormBase
+ * @see \Drupal\Core\Form\ConfigFormBase
+ */
 class FormEver extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -46,6 +55,10 @@ class FormEver extends FormBase {
     $form['actions'] = [
       '#type' => 'actions',
     ];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Submit'),
+    ];
     $form['actions']['add_year'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add Year'),
@@ -77,8 +90,7 @@ class FormEver extends FormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addmoreCallback(array &$form, FormStateInterface $form_state) {
-     $a =$form['table'];
-    return $a;
+    return $form['table'];
   }
 
   /**
@@ -93,7 +105,7 @@ class FormEver extends FormBase {
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $form_state->setRebuild();
+    $values = $form_state->getValue(['table']);
   }
 
 }
