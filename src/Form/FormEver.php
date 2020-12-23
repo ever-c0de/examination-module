@@ -13,7 +13,7 @@ class FormEver extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $num_year = $form_state->get('num_year');
     if ($num_year === NULL) {
-      $form_state->set('$num_year', 1);
+      $form_state->set('num_year', 1);
       $num_year = 1;
     }
 
@@ -43,7 +43,7 @@ class FormEver extends FormBase {
         ];
       }
     }
-    $form['table']['actions'] = [
+    $form['actions'] = [
       '#type' => 'actions',
     ];
     $form['actions']['add_year'] = [
@@ -53,10 +53,6 @@ class FormEver extends FormBase {
       '#ajax' => [
         'callback' => '::addmoreCallback',
       ],
-    ];
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Submit'),
     ];
 
     return $form;
@@ -81,7 +77,8 @@ class FormEver extends FormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addmoreCallback(array &$form, FormStateInterface $form_state) {
-    return $form['table'];
+     $a =$form['table'];
+    return $a;
   }
 
   /**
@@ -90,18 +87,13 @@ class FormEver extends FormBase {
    * Increments the max counter and causes a rebuild.
    */
   public function addYear(array &$form, FormStateInterface $form_state) {
-    $year_field = $form_state->get('num_year');
-    $add_button = $year_field + 1;
-    $form_state->set('num_year', $add_button);
-    // Since our buildForm() method relies on the value of 'num_names' to
-    // generate 'name' form elements, we have to tell the form to rebuild. If we
-    // don't do this, the form builder will not call buildForm().
+    $num_year = $form_state->get('num_year');
+    $form_state->set('num_year', 5);
     $form_state->setRebuild();
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
+    $form_state->setRebuild();
   }
-
 
 }
