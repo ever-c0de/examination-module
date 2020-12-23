@@ -13,7 +13,7 @@ class FormEver extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $num_year = $form_state->get('num_year');
     if ($num_year === NULL) {
-      $year_field = $form_state->set('$num_year', 1);
+      $form_state->set('$num_year', 1);
       $num_year = 1;
     }
 
