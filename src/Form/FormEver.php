@@ -25,80 +25,77 @@ class FormEver extends FormBase {
       $form_state->set('num_year', 0);
       $num_year = 0;
     }
+    $num_table = $form_state->get('num_table');
+    if ($num_table === NULL) {
+      $form_state->set('num_table', 1);
+      $num_table = 1;
+    }
 
 
 
     $form['#tree'] = TRUE;
-    $form['fieldset'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Table № @number',
-        ['@name' => $form_state->getValue('number')]),
-      '#prefix' => '<div id="year-fieldset-wrapper">',
-      '#suffix' => '</div>',
-    ];
-    $form['fieldset']['table'] = [
-      '#type' => 'table',
-      '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun', 'Q2',
-        'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
-      ],
-    ];
-    /*foreach ($form['table']['#header'] as $key) {
-      $form['table'][$year][$key] = [
-        '#type' => 'textfield',
-        '#size' => '5',
+    for ($tables = 0; $tables <= $num_table; $tables++) {
+      $form['fieldset'][$tables] = [
+        '#type' => 'fieldset',
+        '#title' => $this->t('Table № @number',
+          ['@number' => $tables]),
+        '#prefix' => '<div id="year-fieldset-wrapper">',
+        '#suffix' => '</div>',
       ];
-      $form['table'][$year]['Year'] = [
-        '#plain_text' => 2020,
+      $form['fieldset'][$tables]['table'] = [
+        '#type' => 'table',
+        '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun',
+          'Q2', 'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
+        ],
       ];
-    }*/
-// get values, array n shift
+      // get values, array n shift
 
-    for ($i = $num_year; $i >= 0; $i--) {
-//      $previous_year = $current_year - $i;
-      foreach ($form['fieldset']['table']['#header'] as $key) {
-        $form['fieldset']['table'][$current_year - $i][$key] = [
-          '#type' => 'textfield',
-          '#size' => '3',
-        ];
-        $form['fieldset']['table'][$current_year - $i]['Year'] = [
-          '#plain_text' => $current_year - $i,
-        ];
+      for ($i = $num_year; $i >= 0; $i--) {
+        // $previous_year = $current_year - $i;
+        foreach ($form['fieldset']['table']['#header'] as $key) {
+          $form['fieldset']['table'][$current_year - $i][$key] = [
+            '#type' => 'textfield',
+            '#size' => '3',
+          ];
+          $form['fieldset']['table'][$current_year - $i]['Year'] = [
+            '#plain_text' => $current_year - $i,
+          ];
+        }
       }
+      $form['fieldset']['actions'] = [
+        '#type' => 'actions',
+        '#weight' => -1,
+      ];
+      $form['actions'] = [
+        '#type' => 'actions',
+        '#weight' => 1,
+      ];
+      $form['actions']['add_table'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Add Table'),
+        '#submit' => ['::addTable'],
+        '#ajax' => [
+          'callback' => '::addmoreCallback',
+          'wrapper' => 'table-fieldset-wrapper',
+          'effect' => 'slide',
+        ],
+      ];
+      /*$form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Submit'),
+      ];*/
+      $form['fieldset']['actions']['add_year'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Add Year'),
+        '#submit' => ['::addYear'],
+        '#ajax' => [
+          'callback' => '::addmoreCallback',
+          'wrapper' => 'year-fieldset-wrapper',
+          'effect' => 'slide',
+          'speed' => 600,
+        ],
+      ];
     }
-    $form['fieldset']['actions'] = [
-      '#type' => 'actions',
-      '#weight' => -1,
-    ];
-    $form['actions'] = [
-      '#type' => 'actions',
-      '#weight' => 1,
-    ];
-    $form['actions']['add_table'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Add Table'),
-      '#submit' => ['::addTable'],
-      '#ajax' => [
-        'callback' => '::addmoreCallback',
-        'wrapper' => 'table-fieldset-wrapper',
-        'effect' => 'slide',
-      ],
-    ];
-    /*$form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Submit'),
-    ];*/
-    $form['fieldset']['actions']['add_year'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Add Year'),
-      '#submit' => ['::addYear'],
-      '#ajax' => [
-        'callback' => '::addmoreCallback',
-        'wrapper' => 'year-fieldset-wrapper',
-        'effect' => 'slide',
-        'speed' => 600,
-      ],
-    ];
-
     return $form;
   }
 
