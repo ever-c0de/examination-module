@@ -33,6 +33,8 @@ class FormEver extends FormBase {
       '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun', 'Q2',
         'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
       ],
+      '#prefix' => '<div id="year-fieldset-wrapper">',
+      '#suffix' => '</div>',
     ];
     foreach ($form['table']['#header'] as $key) {
       $form['table']['first_row'][$key] = [
@@ -52,19 +54,20 @@ class FormEver extends FormBase {
         ];
       }
     }
-    $form['actions'] = [
+    $form['table']['actions'] = [
       '#type' => 'actions',
     ];
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Submit'),
     ];
-    $form['actions']['add_year'] = [
+    $form['table']['actions']['add_year'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add Year'),
       '#submit' => ['::addYear'],
       '#ajax' => [
         'callback' => '::addmoreCallback',
+        'wrapper' => 'year-fieldset-wrapper',
       ],
     ];
 
@@ -105,7 +108,7 @@ class FormEver extends FormBase {
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $values = $form_state->getValue(['table']);
+    $this->messenger()->addMessage('Nice!');
   }
 
 }
