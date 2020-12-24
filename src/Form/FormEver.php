@@ -26,10 +26,13 @@ class FormEver extends FormBase {
       $num_year = 0;
     }
 
+
+
     $form['#tree'] = TRUE;
     $form['fieldset'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Table №1'),
+      '#title' => $this->t('Table № @number',
+        ['@name' => $form_state->getValue('number')]),
       '#prefix' => '<div id="year-fieldset-wrapper">',
       '#suffix' => '</div>',
     ];
@@ -50,21 +53,35 @@ class FormEver extends FormBase {
     }*/
 // get values, array n shift
 
-    for ($i = $num_year; $i >= 0 ; $i--) {
+    for ($i = $num_year; $i >= 0; $i--) {
 //      $previous_year = $current_year - $i;
       foreach ($form['fieldset']['table']['#header'] as $key) {
-        $form['fieldset']['table'][$current_year-$i][$key] = [
+        $form['fieldset']['table'][$current_year - $i][$key] = [
           '#type' => 'textfield',
           '#size' => '3',
         ];
-        $form['fieldset']['table'][$current_year-$i]['Year'] = [
-          '#plain_text' => $current_year-$i,
+        $form['fieldset']['table'][$current_year - $i]['Year'] = [
+          '#plain_text' => $current_year - $i,
         ];
       }
     }
     $form['fieldset']['actions'] = [
       '#type' => 'actions',
-      '#weight' => -100,
+      '#weight' => -1,
+    ];
+    $form['actions'] = [
+      '#type' => 'actions',
+      '#weight' => 1,
+    ];
+    $form['actions']['add_table'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add Table'),
+      '#submit' => ['::addTable'],
+      '#ajax' => [
+        'callback' => '::addmoreCallback',
+        'wrapper' => 'table-fieldset-wrapper',
+        'effect' => 'slide',
+      ],
     ];
     /*$form['actions']['submit'] = [
       '#type' => 'submit',
@@ -78,6 +95,7 @@ class FormEver extends FormBase {
         'callback' => '::addmoreCallback',
         'wrapper' => 'year-fieldset-wrapper',
         'effect' => 'slide',
+        'speed' => 600,
       ],
     ];
 
@@ -114,6 +132,12 @@ class FormEver extends FormBase {
   public function addYear(array &$form, FormStateInterface $form_state) {
     $num_year = $form_state->get('num_year') + 1;
     $form_state->set('num_year', $num_year);
+    $form_state->setRebuild();
+  }
+
+  public function addTable(array &$form, FormStateInterface $form_state) {
+    $num_table = $form_state->get('num_table') + 1;
+    $form_state->set('num_table', $num_table);
     $form_state->setRebuild();
   }
 
