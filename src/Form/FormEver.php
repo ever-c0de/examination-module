@@ -5,9 +5,6 @@ namespace Drupal\form_ever\Form;
 use Drupal;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Component\Datetime\Time;
 
 /**
  * Implements the ajax demo form controller.
@@ -30,13 +27,17 @@ class FormEver extends FormBase {
     }
 
     $form['#tree'] = TRUE;
-    $form['table'] = [
+    $form['fieldset'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Table №1'),
+      '#prefix' => '<div id="year-fieldset-wrapper">',
+      '#suffix' => '</div>',
+    ];
+    $form['fieldset']['table'] = [
       '#type' => 'table',
       '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun', 'Q2',
         'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
       ],
-      '#prefix' => '<div id="year-fieldset-wrapper">',
-      '#suffix' => '</div>',
     ];
     /*foreach ($form['table']['#header'] as $key) {
       $form['table'][$year][$key] = [
@@ -48,21 +49,20 @@ class FormEver extends FormBase {
       ];
     }*/
 // get values, array n shift
-    $last_year = $form_state->getValues();
-
 
     for ($i = $num_year; $i >= 0 ; $i--) {
-      foreach ($form['table']['#header'] as $key) {
-        $form['table'][$current_year-$i][$key] = [
+//      $previous_year = $current_year - $i;
+      foreach ($form['fieldset']['table']['#header'] as $key) {
+        $form['fieldset']['table'][$current_year-$i][$key] = [
           '#type' => 'textfield',
-          '#size' => '5',
+          '#size' => '3',
         ];
-        $form['table'][$current_year-$i]['Year'] = [
+        $form['fieldset']['table'][$current_year-$i]['Year'] = [
           '#plain_text' => $current_year-$i,
         ];
       }
     }
-    $form['actions'] = [
+    $form['fieldset']['actions'] = [
       '#type' => 'actions',
       '#weight' => -100,
     ];
@@ -70,9 +70,8 @@ class FormEver extends FormBase {
       '#type' => 'submit',
       '#value' => $this->t('Submit'),
     ];*/
-    $form['actions']['add_year'] = [
+    $form['fieldset']['actions']['add_year'] = [
       '#type' => 'submit',
-
       '#value' => $this->t('Add Year'),
       '#submit' => ['::addYear'],
       '#ajax' => [
@@ -104,8 +103,7 @@ class FormEver extends FormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addmoreCallback(array &$form, FormStateInterface $form_state) {
-
-    return $form['table'];
+    return $form['fieldset'];
   }
 
   /**
