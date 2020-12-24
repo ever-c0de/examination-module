@@ -52,7 +52,7 @@ class FormEver extends FormBase {
         '#type' => 'fieldset',
         '#title' => $this->t('Table № @number',
           ['@number' => $tables]),
-        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper-@tables">',
+        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper">',
           ['@tables' => $tables]),
         '#suffix' => '</div></div>',
       ];
