@@ -16,6 +16,14 @@ use Drupal\Core\Form\FormStateInterface;
  * @see \Drupal\Core\Form\ConfigFormBase
  */
 class FormEver extends FormBase {
+
+/*  public function renderYears() {
+
+  }
+  public function  renderTables() {
+
+  }*/
+
   public function buildForm(array $form, FormStateInterface $form_state) {
     $current_year = \Drupal::time()->getCurrentTime();
     $current_year = date('Y', $current_year);
@@ -34,13 +42,19 @@ class FormEver extends FormBase {
 
 
     $form['#tree'] = TRUE;
-    for ($tables = 0; $tables <= $num_table; $tables++) {
+    for ($tables = 1; $tables <= $num_table; $tables++) {
+/*      $form['fieldset'] = [
+        '#type' => 'container',
+        '#prefix' => '<div id="table-fieldset-wrapper">',
+        '#suffix' => '</div>',
+      ];*/
       $form['fieldset'][$tables] = [
         '#type' => 'fieldset',
         '#title' => $this->t('Table № @number',
           ['@number' => $tables]),
-        '#prefix' => '<div id="year-fieldset-wrapper">',
-        '#suffix' => '</div>',
+        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper-@tables">',
+          ['@tables' => $tables]),
+        '#suffix' => '</div></div>',
       ];
       $form['fieldset'][$tables]['table'] = [
         '#type' => 'table',
@@ -52,50 +66,52 @@ class FormEver extends FormBase {
 
       for ($i = $num_year; $i >= 0; $i--) {
         // $previous_year = $current_year - $i;
-        foreach ($form['fieldset']['table']['#header'] as $key) {
-          $form['fieldset']['table'][$current_year - $i][$key] = [
+        foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
+          $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
             '#type' => 'textfield',
             '#size' => '3',
           ];
-          $form['fieldset']['table'][$current_year - $i]['Year'] = [
+          $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
             '#plain_text' => $current_year - $i,
           ];
         }
       }
-      $form['fieldset']['actions'] = [
+      $form['fieldset'][$tables]['actions'] = [
         '#type' => 'actions',
         '#weight' => -1,
-      ];
-      $form['actions'] = [
-        '#type' => 'actions',
-        '#weight' => 1,
-      ];
-      $form['actions']['add_table'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Add Table'),
-        '#submit' => ['::addTable'],
-        '#ajax' => [
-          'callback' => '::addmoreCallback',
-          'wrapper' => 'table-fieldset-wrapper',
-          'effect' => 'slide',
-        ],
       ];
       /*$form['actions']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Submit'),
       ];*/
-      $form['fieldset']['actions']['add_year'] = [
+      $form['fieldset'][$tables]['actions']['add_year'] = [
         '#type' => 'submit',
         '#value' => $this->t('Add Year'),
         '#submit' => ['::addYear'],
         '#ajax' => [
           'callback' => '::addmoreCallback',
-          'wrapper' => 'year-fieldset-wrapper',
+          'wrapper' => $this->t('year-fieldset-wrapper-@tables',
+          ['@tables' => $tables]),
           'effect' => 'slide',
           'speed' => 600,
         ],
       ];
     }
+    $form['actions'] = [
+      '#type' => 'actions',
+      '#weight' => 1,
+    ];
+    $form['actions']['add_table'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add Table'),
+      '#submit' => ['::addTable'],
+      '#ajax' => [
+        'callback' => '::addmoreCallback',
+        'wrapper' => $this->t('table-fieldset-wrapper-@tables',
+        ['@tables' => $tables]),
+        'effect' => 'slide',
+      ],
+    ];
     return $form;
   }
 
