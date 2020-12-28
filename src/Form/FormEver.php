@@ -17,12 +17,34 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class FormEver extends FormBase {
 
-/*  public function renderYears(array &$form, FormStateInterface &$form_state) {
-
+  public function renderYears(array &$form, FormStateInterface &$form_state, $tables, $current_year, $i) {
+    foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
+      $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
+        '#type' => 'textfield',
+        '#size' => '3',
+      ];
+      $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
+        '#plain_text' => $current_year - $i,
+      ];
+    }
   }
-  public function  renderTables(array &$form, FormStateInterface &$form_state) {
 
-  }*/
+  public function  renderTables(array &$form, FormStateInterface &$form_state, $tables) {
+    $form['fieldset'][$tables] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Table № @number',
+        ['@number' => $tables]),
+      '#prefix' => $this->t('<div id="table-fieldset-wrapper-@tables"><div id="year-fieldset-wrapper-@tables">',
+        ['@tables' => $tables]),
+      '#suffix' => '</div></div>',
+    ];
+    $form['fieldset'][$tables]['table'] = [
+      '#type' => 'table',
+      '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun',
+        'Q2', 'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
+      ],
+    ];
+  }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
     $current_year = \Drupal::time()->getCurrentTime();
@@ -41,38 +63,11 @@ class FormEver extends FormBase {
 
     $form['#tree'] = TRUE;
     for ($tables = 1; $tables <= $num_table; $tables++) {
-/*      $form['fieldset'] = [
-        '#type' => 'container',
-        '#prefix' => '<div id="table-fieldset-wrapper">',
-        '#suffix' => '</div>',
-      ];*/
-      $form['fieldset'][$tables] = [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Table № @number',
-          ['@number' => $tables]),
-        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper-@tables">',
-          ['@tables' => $tables]),
-        '#suffix' => '</div></div>',
-      ];
-      $form['fieldset'][$tables]['table'] = [
-        '#type' => 'table',
-        '#header' => ['Year', 'Jan', 'Feb', 'Mar', 'Q1', 'Apr', 'May', 'Jun',
-          'Q2', 'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
-        ],
-      ];
-      // get values, array n shift
+      $this->renderTables($form, $form_state, $tables);
 
       for ($i = $num_year; $i >= 0; $i--) {
         // $previous_year = $current_year - $i;
-        foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
-          $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
-            '#type' => 'textfield',
-            '#size' => '3',
-          ];
-          $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
-            '#plain_text' => $current_year - $i,
-          ];
-        }
+        $this->renderYears($form, $form_state, $tables, $current_year, $i);
       }
       $form['fieldset'][$tables]['actions'] = [
         '#type' => 'actions',
@@ -108,6 +103,7 @@ class FormEver extends FormBase {
         'wrapper' => $this->t('table-fieldset-wrapper-@tables',
         ['@tables' => $tables]),
         'effect' => 'slide',
+        'speed' => 600,
       ],
     ];
     return $form;
