@@ -34,9 +34,9 @@ class FormEver extends FormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Table № @number',
         ['@number' => $tables]),
-      '#prefix' => $this->t('<div id="table-fieldset-wrapper-@tables"><div id="year-fieldset-wrapper-@tables">',
+      /*'#prefix' => $this->t('<div id="table-fieldset-wrapper-@tables"><div id="year-fieldset-wrapper-@tables">',
         ['@tables' => $tables]),
-      '#suffix' => '</div></div>',
+      '#suffix' => '</div></div>',*/
     ];
     $form['fieldset'][$tables]['table'] = [
       '#type' => 'table',
@@ -62,11 +62,13 @@ class FormEver extends FormBase {
     }
 
     $form['#tree'] = TRUE;
+    $form['#attributes'] = [
+      'id' => $this->getFormId(),
+      ];
     for ($tables = 1; $tables <= $num_table; $tables++) {
       $this->renderTables($form, $form_state, $tables);
 
       for ($i = $num_year; $i >= 0; $i--) {
-        // $previous_year = $current_year - $i;
         $this->renderYears($form, $form_state, $tables, $current_year, $i);
       }
       $form['fieldset'][$tables]['actions'] = [
@@ -83,8 +85,7 @@ class FormEver extends FormBase {
         '#submit' => ['::addYear'],
         '#ajax' => [
           'callback' => '::addmoreCallback',
-          'wrapper' => $this->t('year-fieldset-wrapper-@tables',
-          ['@tables' => $tables]),
+          'wrapper' => $this->getFormId(),
           'effect' => 'slide',
           'speed' => 600,
         ],
@@ -100,8 +101,7 @@ class FormEver extends FormBase {
       '#submit' => ['::addTable'],
       '#ajax' => [
         'callback' => '::addmoreCallback',
-        'wrapper' => $this->t('table-fieldset-wrapper-@tables',
-        ['@tables' => $tables]),
+        'wrapper' => $this->getFormId(),
         'effect' => 'slide',
         'speed' => 600,
       ],
@@ -119,7 +119,7 @@ class FormEver extends FormBase {
    *   The unique ID of the form defined by this class.
    */
   public function getFormId() {
-    return 'form_ever';
+    return 'form-ever';
   }
 
   /**
@@ -128,7 +128,7 @@ class FormEver extends FormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addmoreCallback(array &$form, FormStateInterface $form_state) {
-    return $form['fieldset'];
+    return $form;
   }
 
   /**
