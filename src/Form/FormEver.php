@@ -17,10 +17,10 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class FormEver extends FormBase {
 
-/*  public function renderYears() {
+/*  public function renderYears(array &$form, FormStateInterface &$form_state) {
 
   }
-  public function  renderTables() {
+  public function  renderTables(array &$form, FormStateInterface &$form_state) {
 
   }*/
 
@@ -39,8 +39,6 @@ class FormEver extends FormBase {
       $num_table = 1;
     }
 
-
-
     $form['#tree'] = TRUE;
     for ($tables = 1; $tables <= $num_table; $tables++) {
 /*      $form['fieldset'] = [
@@ -52,7 +50,7 @@ class FormEver extends FormBase {
         '#type' => 'fieldset',
         '#title' => $this->t('Table № @number',
           ['@number' => $tables]),
-        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper">',
+        '#prefix' => $this->t('<div id="year-fieldset-wrapper-@tables"><div id="table-fieldset-wrapper-@tables">',
           ['@tables' => $tables]),
         '#suffix' => '</div></div>',
       ];
