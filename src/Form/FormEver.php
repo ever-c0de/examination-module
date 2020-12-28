@@ -17,26 +17,25 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class FormEver extends FormBase {
 
-  public function renderYears(array &$form, FormStateInterface &$form_state, $tables, $current_year, $i) {
-    foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
-      $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
-        '#type' => 'textfield',
-        '#size' => '3',
-      ];
-      $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
-        '#plain_text' => $current_year - $i,
-      ];
+  public function renderYears(&$form, $tables, $num_year, $current_year) {
+    for ($i = $num_year; $i >= 0; $i--) {
+      foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
+        $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
+          '#type' => 'textfield',
+          '#size' => '3',
+        ];
+        $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
+          '#plain_text' => $current_year - $i,
+        ];
+      }
     }
   }
 
-  public function  renderTables(array &$form, FormStateInterface &$form_state, $tables) {
+  public function renderTables(&$form, $tables) {
     $form['fieldset'][$tables] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Table № @number',
         ['@number' => $tables]),
-      /*'#prefix' => $this->t('<div id="table-fieldset-wrapper-@tables"><div id="year-fieldset-wrapper-@tables">',
-        ['@tables' => $tables]),
-      '#suffix' => '</div></div>',*/
     ];
     $form['fieldset'][$tables]['table'] = [
       '#type' => 'table',
@@ -64,21 +63,15 @@ class FormEver extends FormBase {
     $form['#tree'] = TRUE;
     $form['#attributes'] = [
       'id' => $this->getFormId(),
-      ];
-    for ($tables = 1; $tables <= $num_table; $tables++) {
-      $this->renderTables($form, $form_state, $tables);
+    ];
 
-      for ($i = $num_year; $i >= 0; $i--) {
-        $this->renderYears($form, $form_state, $tables, $current_year, $i);
-      }
+    for ($tables = 1; $tables <= $num_table; $tables++) {
+      $this->renderTables($form, $tables);
+      $this->renderYears($form, $tables, $num_year, $current_year);
       $form['fieldset'][$tables]['actions'] = [
         '#type' => 'actions',
         '#weight' => -1,
       ];
-      /*$form['actions']['submit'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Submit'),
-      ];*/
       $form['fieldset'][$tables]['actions']['add_year'] = [
         '#type' => 'submit',
         '#value' => $this->t('Add Year'),
@@ -91,6 +84,7 @@ class FormEver extends FormBase {
         ],
       ];
     }
+
     $form['actions'] = [
       '#type' => 'actions',
       '#weight' => 1,
