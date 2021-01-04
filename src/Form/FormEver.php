@@ -219,7 +219,6 @@ class FormEver extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // If submit pressed -> start validation.
     if ($form_state->getTriggeringElement()['#name'] == 'submit') {
       // Get the array of 'fieldset' values.
       $tables = $form_state->getValue('fieldset');
@@ -240,7 +239,7 @@ class FormEver extends FormBase {
           for ($i = 1; $i <= 12; $i++) {
             if ($months[$i] !== '') {
               if ($ready) {
-                // That means, period is broken.
+                // That means period is broken.
                 $period_start = $start;
                 $period_end = $end;
                 $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Invalid!');
