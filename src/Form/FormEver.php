@@ -36,6 +36,9 @@ class FormEver extends FormBase {
    *   An array with year fields.
    */
   public function renderYears(array &$form, $form_state, int $tables, int $current_year): array {
+    $rows = ['Year', '1', '2', '3', 'Q1', '4', '5', '6',
+      'Q2', '7', '8', '9', 'Q3', '10', '11', '12', 'Q4', 'YTD',
+    ];
     $years = [];
     $num_year = $form_state->getValues();
     if ($num_year == NULL) {
@@ -49,14 +52,14 @@ class FormEver extends FormBase {
       $num_year = $form_state->get("fieldset_$tables");
     }
     for ($i = $num_year; $i >= 0; $i--) {
-      foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
-        $years = $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
+      foreach ($rows as $row) {
+        $year_value = $current_year - $i;
+        $years = $form['fieldset'][$tables]['table'][$year_value][$row] = [
           '#type' => 'number',
           '#min' => 0,
           '#step' => 0.01,
-          '#size' => 3,
         ];
-        $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
+        $form['fieldset'][$tables]['table'][$year_value]['Year'] = [
           '#plain_text' => $current_year - $i,
         ];
       }
@@ -235,7 +238,7 @@ class FormEver extends FormBase {
         foreach ($table['table'] as $year => $months) {
           // Check each month in year.
           for ($i = 1; $i <= 12; $i++) {
-            if ($months !== '') {
+            if ($months[$i] !== '') {
               if ($ready) {
                 // That means, period is broken.
                 $period_start = $start;
