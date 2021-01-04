@@ -17,12 +17,32 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class FormEver extends FormBase {
 
-  public function renderYears(&$form, $tables, $num_year, $current_year) {
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'form-ever';
+  }
+
+  public function renderYears(&$form, $form_state, $tables, $current_year) {
+    $num_year = $form_state->getValues();
+    if ($num_year == NULL) {
+      $form_state->set("fieldset_$tables", 0);
+      $num_year = 0;
+    }
+    elseif ($form_state->get("fieldset_$tables") === NULL) {
+      $num_year = 0;
+    }
+    else {
+      $num_year = $form_state->get("fieldset_$tables");
+    }
     for ($i = $num_year; $i >= 0; $i--) {
       foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
         $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
-          '#type' => 'textfield',
-          '#size' => '3',
+          '#type' => 'number',
+          '#min' => 0,
+          '#step' => 0.01,
+          '#size' => 3,
         ];
         $form['fieldset'][$tables]['table'][$current_year - $i]['Year'] = [
           '#plain_text' => $current_year - $i,
@@ -31,7 +51,7 @@ class FormEver extends FormBase {
     }
   }
 
-  public function renderTables(&$form, $tables) {
+  public function renderTables(&$form, $form_state, $tables) {
     $form['fieldset'][$tables] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Table № @number',
@@ -43,39 +63,50 @@ class FormEver extends FormBase {
         'Q2', 'Jul', 'Aug', 'Sep', 'Q3', 'Oct', 'Nov', 'Dec', 'Q4', 'YTD',
       ],
     ];
+    $form['fieldset'][$tables]['actions'] = [
+      '#type' => 'actions',
+      '#weight' => -1,
+    ];
+    $form['fieldset'][$tables]['actions']['add_year'] = [
+      '#name' => "add_year_$tables",
+      '#type' => 'submit',
+      '#value' => $this->t('Add Year'),
+      '#submit' => ['::addYear'],
+      '#ajax' => [
+        'callback' => '::addmoreCallback',
+        'wrapper' => $this->getFormId(),
+        'effect' => 'slide',
+        'speed' => 600,
+      ],
+    ];
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
     $current_year = \Drupal::time()->getCurrentTime();
     $current_year = date('Y', $current_year);
 
-    $num_year = $form_state->get('num_year');
-    if ($num_year === NULL) {
-      $form_state->set('num_year', 0);
-      $num_year = 0;
-    }
     $num_table = $form_state->get('num_table');
     if ($num_table === NULL) {
       $form_state->set('num_table', 1);
       $num_table = 1;
     }
-
     $form['#tree'] = TRUE;
     $form['#attributes'] = [
       'id' => $this->getFormId(),
     ];
 
     for ($tables = 1; $tables <= $num_table; $tables++) {
-      $this->renderTables($form, $tables);
-      $this->renderYears($form, $tables, $num_year, $current_year);
-      $form['fieldset'][$tables]['actions'] = [
+      $this->renderTables($form, $form_state, $tables);
+      $this->renderYears($form, $form_state, $tables, $current_year);
+
+      $form['actions'] = [
         '#type' => 'actions',
-        '#weight' => -1,
+        '#weight' => 1,
       ];
-      $form['fieldset'][$tables]['actions']['add_year'] = [
+      $form['actions']['add_table'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Add Year'),
-        '#submit' => ['::addYear'],
+        '#value' => $this->t('Add Table'),
+        '#submit' => ['::addTable'],
         '#ajax' => [
           'callback' => '::addmoreCallback',
           'wrapper' => $this->getFormId(),
@@ -84,36 +115,7 @@ class FormEver extends FormBase {
         ],
       ];
     }
-
-    $form['actions'] = [
-      '#type' => 'actions',
-      '#weight' => 1,
-    ];
-    $form['actions']['add_table'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Add Table'),
-      '#submit' => ['::addTable'],
-      '#ajax' => [
-        'callback' => '::addmoreCallback',
-        'wrapper' => $this->getFormId(),
-        'effect' => 'slide',
-        'speed' => 600,
-      ],
-    ];
     return $form;
-  }
-
-  /**
-   * Getter method for Form ID.
-   *
-   * The form ID is used in implementations of hook_form_alter() to allow other
-   * modules to alter the render array built by this form controller.
-   *
-   * @return string
-   *   The unique ID of the form defined by this class.
-   */
-  public function getFormId() {
-    return 'form-ever';
   }
 
   /**
@@ -130,16 +132,23 @@ class FormEver extends FormBase {
    *
    * Increments the max counter and causes a rebuild.
    */
-  public function addYear(array &$form, FormStateInterface $form_state) {
-    $num_year = $form_state->get('num_year') + 1;
-    $form_state->set('num_year', $num_year);
-    $form_state->setRebuild();
-  }
-
   public function addTable(array &$form, FormStateInterface $form_state) {
     $num_table = $form_state->get('num_table') + 1;
     $form_state->set('num_table', $num_table);
     $form_state->setRebuild();
+  }
+
+  public function addYear(array &$form, FormStateInterface $form_state) {
+    foreach ($form_state->getValues()['fieldset'] as $key => $val) {
+      if ($a = $form_state->getTriggeringElement()['#parents'][1] == $key) {
+        $num_year = $form_state->get("fieldset_$key") + 1;
+        $form_state->set("fieldset_$key", $num_year);
+        $form_state->setRebuild();
+      }
+      else {
+        $form_state->setRebuild();
+      }
+    }
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {

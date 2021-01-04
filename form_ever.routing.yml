@@ -1,4 +1,4 @@
-form_ever.custom-form:
+form_ever.form:
   path: '/module-page'
   defaults:
     _controller:  '\Drupal\form_ever\Controller\Page::renderForm'
