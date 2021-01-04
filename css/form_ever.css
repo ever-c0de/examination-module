@@ -1,0 +1,19 @@
+#form-ever td input {
+  width: 50px;
+}
+
+#form-ever table tr th {
+  text-align: center;
+}
+#form-ever tr td {
+  background-color: #1ebbd7;
+}
+#form-ever tr td:first-child {
+  background-color: #005073;
+  color: #d4eef9;
+}
+
+#form-ever tr td:nth-child(4n+5),
+#form-ever tr td:last-child {
+  background-color: #189ad3;
+}

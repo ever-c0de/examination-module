@@ -1,0 +1,9 @@
+form:
+  version: 1.0
+  css:
+    layout:
+      css/form_ever.css: {}
+  js:
+    js/form_ever.js: {}
+  dependencies:
+    - core/jquery
