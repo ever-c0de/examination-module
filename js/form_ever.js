@@ -7,7 +7,7 @@
     attach: function (context, settings) {
       // Attach function to all inputs.
       $("#form-ever tr td input").once('calcSummary').on('change', function (event) {
-        let el_tr = $(event.target); // Input action.
+        let el_tr = $(event.target);
         let el_cell = el_tr.parent().parent(); // The father of input
         let el_val = Number(el_tr.val()); // The value of input.
         let index = el_cell.index();
@@ -42,9 +42,9 @@
 
         // Check if value sets by user, not different than 0.05.
         function checkAndSet(values) {
-          let tmpTotal = calcOutput(values);
-          if (Math.abs(tmpTotal - el_val) > 0.05) {
-            el_tr.val(tmpTotal.toFixed(2));
+          let userValue = calcOutput(values);
+          if (Math.abs(userValue - el_val) > 0.05) {
+            el_tr.val(userValue.toFixed(2));
           }
         }
 

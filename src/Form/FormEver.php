@@ -166,7 +166,7 @@ class FormEver extends FormBase {
    *
    * @param array $form
    *   Gets the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param $form_state
    *   Gets the form state.
    *
    * @return array
@@ -183,7 +183,7 @@ class FormEver extends FormBase {
    *
    * @param array $form
    *   Gets the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param $form_state
    *   Use form state for get the number of tables and set it.
    */
   public function addTable(array &$form, FormStateInterface $form_state) {
@@ -199,7 +199,7 @@ class FormEver extends FormBase {
    *
    * @param array $form
    *   Gets the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param $form_state
    *   Use form state to find triggered button and set new value to num_year.
    */
   public function addYear(array &$form, FormStateInterface $form_state) {
@@ -228,55 +228,55 @@ class FormEver extends FormBase {
 
       foreach ($tables as $table_num => $table) {
         // Variables for each table.
-        $start = NULL;
-        $end = NULL;
+        $start_value = NULL;
+        $end_value = NULL;
         // Variable for table is ready.
-        $ready = FALSE;
+        $finish = FALSE;
 
         // Check each year in table.
         foreach ($table['table'] as $year => $months) {
           // Check each month in year.
           for ($i = 1; $i <= 12; $i++) {
             if ($months[$i] !== '') {
-              if ($ready) {
+              if ($finish) {
                 // That means period is broken.
-                $period_start = $start;
-                $period_end = $end;
+                $period_start = $start_value;
+                $period_end = $end_value;
                 $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Invalid!');
                 break(3);
               }
               // If period was not completed.
               else {
                 // Set start and end if it does not exist.
-                if (!$start) {
-                  $start = mktime(0, 0, 0, $i, 1, $year);
-                  $end = $start;
+                if (!$start_value) {
+                  $start_value = mktime(0, 0, 0, $i, 1, $year);
+                  $end_value = $start_value;
                 }
                 // Else just set end of the period at current month.
                 else {
-                  $end = mktime(0, 0, 0, $i, 1, $year);
+                  $end_value = mktime(0, 0, 0, $i, 1, $year);
                 }
               }
             }
             else {
               // If end of the period is set, we have end of
               // uninterrupted period, so set the completed flag.
-              if ($end) {
-                $ready = TRUE;
+              if ($end_value) {
+                $finish = TRUE;
               }
             }
           }
         }
         if ($period_start && $period_end) {
-          if (($period_start !== $start) || ($period_end !== $end)) {
+          if (($period_start !== $start_value) || ($period_end !== $end_value)) {
             $form_state->setError($form['fieldset'][$table_num], 'Invalid!');
             break;
           }
         }
         // Else set the first found period as common to compare with.
         else {
-          $period_start = $start;
-          $period_end = $end;
+          $period_start = $start_value;
+          $period_end = $end_value;
         }
       }
       if (!$period_start && !$period_end) {
