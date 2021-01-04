@@ -91,6 +91,8 @@ class FormEver extends FormBase {
       $num_table = 1;
     }
     $form['#tree'] = TRUE;
+    // Attach style and js files.
+    $form['#attached'] = ['library' => ['form_ever/form']];
     $form['#attributes'] = [
       'id' => $this->getFormId(),
     ];
@@ -113,6 +115,11 @@ class FormEver extends FormBase {
           'effect' => 'slide',
           'speed' => 600,
         ],
+      ];
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#name' => 'submit',
+        '#value' => $this->t('Submit'),
       ];
     }
     return $form;
@@ -151,8 +158,86 @@ class FormEver extends FormBase {
     }
   }
 
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Start validation only if submit button triggered.
+    if ($form_state->getTriggeringElement()['#name'] == 'submit') {
+      // Get array of the input values.
+      $tables = $form_state->getValue('fieldset');
+      // Variables to store the common not empty period of values
+      // what should be the same for all tables.
+      $period_start = NULL;
+      $period_end = NULL;
+
+      // Walk across the tables.
+      foreach ($tables as $table_num => $table) {
+        // Variables to store period inside one table.
+        $start = NULL;
+        $end = NULL;
+        // Indicates that period is completed.
+        $completed = FALSE;
+
+        // Walk across the years (table rows).
+        foreach ($table['table'] as $year => $months) {
+          // Walk across the months cells only not summaries and year.
+          for ($i = 1; $i <= 12; $i++) {
+            // If cell is not empty...
+            if ($months[$i] !== '') {
+              // Check if period had been completed.
+              if ($completed) {
+                // If so, we have interrupted period. So set an error.
+                // These setting necessary to avoid empty form error
+                // cause all of the loops will be broken and it will not be set.
+                $period_start = $start;
+                $period_end = $end;
+                $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Invalid!');
+                break(3);
+              }
+              // If period was not completed.
+              else {
+                // Set start and end if it does not exist.
+                if (!$start) {
+                  $start = mktime(0, 0, 0, $i, 1, $year);
+                  $end = $start;
+                }
+                // Else just set end of the period at current month.
+                else {
+                  $end = mktime(0, 0, 0, $i, 1, $year);
+                }
+              }
+            }
+            // If cell is empty...
+            else {
+              // If end of the period is set, we have end of
+              // uninterrupted period, so set the completed flag.
+              if ($end) {
+                $completed = TRUE;
+              }
+            }
+          }
+        }
+        // If it isn't the first table we walking at and the common period is
+        // set compare it with current table and set error if it isn't the same.
+        if ($period_start && $period_end) {
+          if (($period_start !== $start) || ($period_end !== $end)) {
+            $form_state->setError($form['fieldset'][$table_num], 'Invalid!');
+            break;
+          }
+        }
+        // Else set the first found period as common to compare with.
+        else {
+          $period_start = $start;
+          $period_end = $end;
+        }
+      }
+      // If at the end we found nothing form is empty.
+      if (!$period_start && !$period_end) {
+        $form_state->setError($form, 'Form is empty!');
+      }
+    }
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->messenger()->addMessage('Nice!');
+    $this->messenger()->addMessage('Valid!');
   }
 
 }
