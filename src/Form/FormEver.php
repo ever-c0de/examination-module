@@ -159,31 +159,29 @@ class FormEver extends FormBase {
   }
 
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Start validation only if submit button triggered.
+    // If submit pressed -> start validation.
     if ($form_state->getTriggeringElement()['#name'] == 'submit') {
-      // Get array of the input values.
+      // Get the array of 'fieldset' values.
       $tables = $form_state->getValue('fieldset');
-      // Variables to store the common not empty period of values
-      // what should be the same for all tables.
+      // Storage values for not empty period.
       $period_start = NULL;
       $period_end = NULL;
 
-      // Walk across the tables.
       foreach ($tables as $table_num => $table) {
-        // Variables to store period inside one table.
+        // Variables for each table.
         $start = NULL;
         $end = NULL;
-        // Indicates that period is completed.
-        $completed = FALSE;
+        // Variable for table is ready.
+        $ready = FALSE;
 
-        // Walk across the years (table rows).
+        // Check each year in table.
         foreach ($table['table'] as $year => $months) {
           // Walk across the months cells only not summaries and year.
           for ($i = 1; $i <= 12; $i++) {
             // If cell is not empty...
             if ($months[$i] !== '') {
               // Check if period had been completed.
-              if ($completed) {
+              if ($ready) {
                 // If so, we have interrupted period. So set an error.
                 // These setting necessary to avoid empty form error
                 // cause all of the loops will be broken and it will not be set.
@@ -210,7 +208,7 @@ class FormEver extends FormBase {
               // If end of the period is set, we have end of
               // uninterrupted period, so set the completed flag.
               if ($end) {
-                $completed = TRUE;
+                $ready = TRUE;
               }
             }
           }
