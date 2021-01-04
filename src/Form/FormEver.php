@@ -7,13 +7,9 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Implements the ajax demo form controller.
+ * Implements the form that calculate quartals and YTD values.
  *
- * This example demonstrates using ajax callbacks to add people's names to a
- * list of picnic attendees.
- *
- * @see \Drupal\Core\Form\FormBase
- * @see \Drupal\Core\Form\ConfigFormBase
+ * Its have functionality for adding more than 1 table and years to each table.
  */
 class FormEver extends FormBase {
 
@@ -24,7 +20,23 @@ class FormEver extends FormBase {
     return 'form-ever';
   }
 
-  public function renderYears(&$form, $form_state, $tables, $current_year) {
+  /**
+   * Method for rendering years for each table.
+   *
+   * @param array $form
+   *   Gets the form.
+   * @param array $form_state
+   *   Gets the form state for set and get values.
+   * @param int $tables
+   *   Count of tables in the form.
+   * @param int $current_year
+   *   Current year set by Drupal.
+   *
+   * @return array
+   *   An array with year fields.
+   */
+  public function renderYears(array &$form, $form_state, int $tables, int $current_year): array {
+    $years = [];
     $num_year = $form_state->getValues();
     if ($num_year == NULL) {
       $form_state->set("fieldset_$tables", 0);
@@ -38,7 +50,7 @@ class FormEver extends FormBase {
     }
     for ($i = $num_year; $i >= 0; $i--) {
       foreach ($form['fieldset'][$tables]['table']['#header'] as $key) {
-        $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
+        $years = $form['fieldset'][$tables]['table'][$current_year - $i][$key] = [
           '#type' => 'number',
           '#min' => 0,
           '#step' => 0.01,
@@ -49,9 +61,24 @@ class FormEver extends FormBase {
         ];
       }
     }
+    return $years;
   }
 
-  public function renderTables(&$form, $form_state, $tables) {
+  /**
+   * Render tables in fieldset for the form.
+   *
+   * @param array $form
+   *   Gets the form.
+   * @param array $form_state
+   *   Gets the form state.
+   * @param int $tables
+   *   A number of tables in fieldset.
+   *
+   * @return array
+   *   Return an array of tables.
+   */
+  public function renderTables(array &$form, $form_state, int $tables) {
+    $tables_return = [];
     $form['fieldset'][$tables] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Table № @number',
@@ -79,8 +106,12 @@ class FormEver extends FormBase {
         'speed' => 600,
       ],
     ];
+    return $tables_return;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $current_year = \Drupal::time()->getCurrentTime();
     $current_year = date('Y', $current_year);
@@ -129,15 +160,28 @@ class FormEver extends FormBase {
    * Callback for both ajax-enabled buttons.
    *
    * Selects and returns the fieldset with the names in it.
+   *
+   * @param array $form
+   *   Gets the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Gets the form state.
+   *
+   * @return array
+   *   Return ready form.
    */
   public function addmoreCallback(array &$form, FormStateInterface $form_state) {
     return $form;
   }
 
   /**
-   * Submit handler for the "add-one-more" button.
+   * Submit handler for the "Add table" button.
    *
-   * Increments the max counter and causes a rebuild.
+   * Increments tables value to render more tables.
+   *
+   * @param array $form
+   *   Gets the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Use form state for get the number of tables and set it.
    */
   public function addTable(array &$form, FormStateInterface $form_state) {
     $num_table = $form_state->get('num_table') + 1;
@@ -145,9 +189,19 @@ class FormEver extends FormBase {
     $form_state->setRebuild();
   }
 
+  /**
+   * Submit handler for the "Add year" button in each fieldset .
+   *
+   * Gets the right fieldset and increase value for year value.
+   *
+   * @param array $form
+   *   Gets the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Use form state to find triggered button and set new value to num_year.
+   */
   public function addYear(array &$form, FormStateInterface $form_state) {
     foreach ($form_state->getValues()['fieldset'] as $key => $val) {
-      if ($a = $form_state->getTriggeringElement()['#parents'][1] == $key) {
+      if ($form_state->getTriggeringElement()['#parents'][1] == $key) {
         $num_year = $form_state->get("fieldset_$key") + 1;
         $form_state->set("fieldset_$key", $num_year);
         $form_state->setRebuild();
@@ -158,6 +212,9 @@ class FormEver extends FormBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // If submit pressed -> start validation.
     if ($form_state->getTriggeringElement()['#name'] == 'submit') {
@@ -176,15 +233,11 @@ class FormEver extends FormBase {
 
         // Check each year in table.
         foreach ($table['table'] as $year => $months) {
-          // Walk across the months cells only not summaries and year.
+          // Check each month in year.
           for ($i = 1; $i <= 12; $i++) {
-            // If cell is not empty...
-            if ($months[$i] !== '') {
-              // Check if period had been completed.
+            if ($months !== '') {
               if ($ready) {
-                // If so, we have interrupted period. So set an error.
-                // These setting necessary to avoid empty form error
-                // cause all of the loops will be broken and it will not be set.
+                // That means, period is broken.
                 $period_start = $start;
                 $period_end = $end;
                 $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Invalid!');
@@ -203,7 +256,6 @@ class FormEver extends FormBase {
                 }
               }
             }
-            // If cell is empty...
             else {
               // If end of the period is set, we have end of
               // uninterrupted period, so set the completed flag.
@@ -213,8 +265,6 @@ class FormEver extends FormBase {
             }
           }
         }
-        // If it isn't the first table we walking at and the common period is
-        // set compare it with current table and set error if it isn't the same.
         if ($period_start && $period_end) {
           if (($period_start !== $start) || ($period_end !== $end)) {
             $form_state->setError($form['fieldset'][$table_num], 'Invalid!');
@@ -227,13 +277,15 @@ class FormEver extends FormBase {
           $period_end = $end;
         }
       }
-      // If at the end we found nothing form is empty.
       if (!$period_start && !$period_end) {
         $form_state->setError($form, 'Form is empty!');
       }
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->messenger()->addMessage('Valid!');
   }
