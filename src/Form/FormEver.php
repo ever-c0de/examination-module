@@ -218,6 +218,13 @@ class FormEver extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->messenger()->addMessage('Form is valid.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#name'] == 'submit') {
       // Get the array of 'fieldset' values.
@@ -236,13 +243,13 @@ class FormEver extends FormBase {
         // Check each year in table.
         foreach ($table['table'] as $year => $months) {
           // Check each month in year.
-          for ($i = 1; $i <= 12; $i++) {
+          for ($i = 1; $i < 13; $i++) {
             if ($months[$i] !== '') {
               if ($finish) {
                 // That means period is broken.
                 $period_start = $start_value;
                 $period_end = $end_value;
-                $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Invalid!');
+                $form_state->setError($form['fieldset'][$table_num]['table'][$year][$i], 'Form is not Valid.');
                 break(3);
               }
               // If period was not completed.
@@ -269,7 +276,7 @@ class FormEver extends FormBase {
         }
         if ($period_start && $period_end) {
           if (($period_start !== $start_value) || ($period_end !== $end_value)) {
-            $form_state->setError($form['fieldset'][$table_num], 'Invalid!');
+            $form_state->setError($form['fieldset'][$table_num], 'Form is not Valid.');
             break;
           }
         }
@@ -280,16 +287,9 @@ class FormEver extends FormBase {
         }
       }
       if (!$period_start && !$period_end) {
-        $form_state->setError($form, 'Form is empty!');
+        $form_state->setError($form, 'Form is empty.');
       }
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->messenger()->addMessage('Valid!');
   }
 
 }
