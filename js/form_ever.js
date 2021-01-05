@@ -8,8 +8,10 @@
       // Attach function to all inputs.
       $("#form-ever tr td input").once('calculate').on('change', function (event) {
         let el_tr = $(event.target);
-        let el_cell = el_tr.parent().parent(); // The father of input
-        let el_val = Number(el_tr.val()); // The value of input.
+        // Cell
+        let el_cell = el_tr.parent().parent();
+        // Input
+        let el_val = Number(el_tr.val());
         let index = el_cell.index();
 
         // Calculate periods and year cells.
@@ -18,53 +20,51 @@
         }
 
         // Check if value sets by user, not different than 0.05.
-        function valUserNumber(values) {
+        function customNumber(values) {
           let userValue = calcOutput(values);
           if (Math.abs(userValue - el_val) > 0.05) {
             el_tr.val(userValue.toFixed(2));
           }
         }
 
-        // Get values and write it into array.
-        function getValues() {
+        // Function for get values and write it to array.
+        function writeValues() {
+          // Loop value.
+          let loop = 3;
           let values = [];
-          let current = el_cell;
-          // This need for set how many loops needed.
-          let q = 3;
-          if (index < 17) {
-            q = 2;
+          if (index <= 16) {
+            loop = 2;
           }
           // Storing values.
-          for (let i = q; i >= 0; i--) {
+          for (let i = loop; i >= 0; i--) {
             if (index === 17) {
               let n = 16 - 4 * (i);
-              current = $(el_cell.siblings()[n]);
+              el_cell = $(el_cell.siblings()[n]);
             } else {
-              // If getting month values just walk back to previous 3 cells.
-              current = current.prev();
+              el_cell = el_cell.prev();
             }
-            values[i] = Number($($(current.children()[0]).children()[0]).val());
+            values[i] = Number($($(el_cell.children()[0]).children()[0]).val());
           }
           return values;
         }
 
         /*
-        * If quarter cell was triggered ->
+        * If month cell was triggered ->
         * check value and trigger the year input for update its value.
         * */
         if ((index % 4) === 0) {
-          valUserNumber(getValues());
+          customNumber(writeValues());
+
           $($($(el_cell.siblings()[16]).children()[0]).children()[0]).triggerHandler('change');
         } else if (index === 17) {
+          customNumber(writeValues());
           // If the year input was triggered just checks its value.
-          valUserNumber(getValues());
         } else {
           /*
-          * If a month input was triggered ->
-          * trigger the handler for the appropriate quarter input.
+          * If month input was triggered.
           * */
-          let quarter = $(el_cell.siblings()[(((index / 4 >> 0) + 1) * 4) - 1]);
-          $($(quarter.children()[0]).children()[0]).triggerHandler('change');
+          let month = $(el_cell.siblings()[(((index / 4 >> 0) + 1) * 4) - 1]);
+          $($(month.children()[0]).children()[0]).triggerHandler('change');
         }
       });
     }
