@@ -3,10 +3,10 @@
 *  Check if output value not difference 0.5.
 * */
 (function ($, Drupal) {
-  Drupal.behaviors.calcSummary = {
+  Drupal.behaviors.calculate = {
     attach: function (context, settings) {
       // Attach function to all inputs.
-      $("#form-ever tr td input").once('calcSummary').on('change', function (event) {
+      $("#form-ever tr td input").once('calculate').on('change', function (event) {
         let el_tr = $(event.target);
         let el_cell = el_tr.parent().parent(); // The father of input
         let el_val = Number(el_tr.val()); // The value of input.
@@ -15,6 +15,14 @@
         // Calculate periods and year cells.
         function calcOutput(periods) {
           return (periods.reduce((a, b) => a + b, 0) + 1) / periods.length;
+        }
+
+        // Check if value sets by user, not different than 0.05.
+        function valUserNumber(values) {
+          let userValue = calcOutput(values);
+          if (Math.abs(userValue - el_val) > 0.05) {
+            el_tr.val(userValue.toFixed(2));
+          }
         }
 
         // Get values and write it into array.
@@ -40,24 +48,16 @@
           return values;
         }
 
-        // Check if value sets by user, not different than 0.05.
-        function checkAndSet(values) {
-          let userValue = calcOutput(values);
-          if (Math.abs(userValue - el_val) > 0.05) {
-            el_tr.val(userValue.toFixed(2));
-          }
-        }
-
         /*
         * If quarter cell was triggered ->
         * check value and trigger the year input for update its value.
         * */
         if ((index % 4) === 0) {
-          checkAndSet(getValues());
+          valUserNumber(getValues());
           $($($(el_cell.siblings()[16]).children()[0]).children()[0]).triggerHandler('change');
         } else if (index === 17) {
           // If the year input was triggered just checks its value.
-          checkAndSet(getValues());
+          valUserNumber(getValues());
         } else {
           /*
           * If a month input was triggered ->
